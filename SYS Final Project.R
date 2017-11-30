@@ -25,16 +25,13 @@ min(wine$points)
 unique(wine$points)
 # Convert 100-based scores to 5-based ratings, and create a new column to store ratings 
 wine$ratings <- 0
-for (i in 1:nrow(wine)){
-  if ((80 <= wine$points[i]) && (wine$points[i] < 84)){
-    wine$ratings[i] <- 1
-  } else if ((84 <= wine$points[i]) && (wine$points[i] < 88)){
-    wine$ratings[i] <- 2
-  } else if ((88 <= wine$points[i]) && (wine$points[i] < 92)){
-    wine$ratings[i] <- 3
-  } else if ((92 <= wine$points[i]) && (wine$points[i] < 96)){
-    wine$ratings[i] <- 4
-  } else{
-    wine$ratings[i] <- 5
-  }
-}
+wine$ratings[which((80 <= wine$points) & (wine$points < 84))] <- 1
+wine$ratings[which((84 <= wine$points) & (wine$points < 86))] <- 2
+wine$ratings[which((86 <= wine$points) & (wine$points < 87))] <- 3
+wine$ratings[which((87 <= wine$points) & (wine$points < 88))] <- 4
+wine$ratings[which((88 <= wine$points) & (wine$points < 89))] <- 5
+wine$ratings[which((89 <= wine$points) & (wine$points < 90))] <- 6
+wine$ratings[which((90 <= wine$points) & (wine$points < 91))] <- 7
+wine$ratings[which((91 <= wine$points) & (wine$points < 92))] <- 8
+wine$ratings[which((92 <= wine$points) & (wine$points < 93))] <- 9
+wine$ratings[which((93 <= wine$points) & (wine$points <= 100))] <- 10
