@@ -16,6 +16,7 @@ for (i in 1:nrow(wine)){
   }
 }
 # Remove all rows that still have missing values
+wine[wine == ""] <- NA
 wine <- wine[complete.cases(wine),]
 
 # Check for score distribution
