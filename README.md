@@ -9,8 +9,8 @@ Boh Young Sun: bs6ea
 Ni Zhuang: nz4gg
 
 # Role
-Xinyang Liu:
+Xinyang Liu: Data Cleaning, Non-linear Model, Text Mining
 
-Boh Young Sun:
+Boh Young Sun: Non-parametric Model, Text Mining
 
-Ni Zhuang:
+Ni Zhuang: Data Cleaning, Linear Model, Text Mining
