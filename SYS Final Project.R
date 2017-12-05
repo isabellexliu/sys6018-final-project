@@ -20,6 +20,10 @@ for (i in 1:nrow(wine)){
 wine[wine == ""] <- NA
 wine <- wine[complete.cases(wine),]
 
+# visualize wine rating distribution
+pts <- table(wine$points)
+barplot(pts, main = "Distribution of Wine Rating", xlab = "Rating", ylab = "Counts", col = "Dark Red")
+
 # Factorize or characterize chategorical variables
 wine$country <- factor(wine$country)
 wine$description <- as.character(wine$description)
