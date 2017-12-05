@@ -33,7 +33,7 @@ wine$winery <- factor(wine$winery)
 # Check for score distribution
 max(wine$points)
 min(wine$points)
-unique(wine$points)
+unique(sort(wine$points))
 
 # Convert 100-based scores to 5-based ratings, and create a new column to store ratings 
 wine$ratings <- 0
