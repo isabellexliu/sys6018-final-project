@@ -38,6 +38,10 @@ wine$winery <- factor(wine$winery)
 pts <- table(wine$points)
 barplot(pts, main = "Distribution of Wine Scores", xlab = "Scores", ylab = "Counts", col = "Dark Red")
 
+# visualize wine price distribution
+prc <- table(wine$price)
+barplot(prc, main = "Distribution of Wine Prices", xlab = "Prices", ylab = "Counts", col = "Dark Red")
+
 # Convert 100-based scores to 5-based ratings, and create a new column to store ratings 
 wine$ratings <- 0
 wine$ratings[which((80 <= wine$points) & (wine$points < 84))] <- 1
