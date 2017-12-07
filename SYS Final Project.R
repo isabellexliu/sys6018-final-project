@@ -349,3 +349,43 @@ cv.err$delta #
 
 wine.final.lm <- wine.result
 
+
+########## Non-parametric method (knn) ##########
+
+library(caret)
+
+# create a training control
+trctrl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+
+set.seed(23)
+# run knn 
+
+remove_cols <- nearZeroVar(train, names = TRUE, 
+                              freqCut = 19, uniqueCut = 10)
+remove_cols
+knn.fit <- train(points ~.-X-description-ratings, data = train, method = "knn",
+                 trControl=trctrl,
+                 preProcess = c("center", "scale"),
+                 tuneLength = 5)
+
+knn.fit
+
+#k-Nearest Neighbors 
+
+#57963 samples
+#10 predictor
+
+#Pre-processing: centered (259), scaled (259) 
+#Resampling: Cross-Validated (5 fold, repeated 1 times) 
+#Summary of sample sizes: 46370, 46371, 46370, 46370, 46371 
+#Resampling results across tuning parameters:
+  
+#  k   RMSE      Rsquared   MAE     
+#  5  2.480585  0.4405764  1.929249
+#  7  2.484981  0.4356123  1.939000
+#  9  2.488855  0.4321065  1.948077
+#  11  2.496001  0.4277634  1.957117
+#  13  2.503311  0.4238275  1.966980
+
+# RMSE was used to select the optimal model using  the smallest value.
+# The final value used for the model was k = 5.
