@@ -9,6 +9,22 @@ wine <- read.csv("wine.csv")
 
 ################################# Data Cleaning #################################
 
+
+# Remove missing values in points and price
+wine <- wine[complete.cases(wine),]
+
+# visualize wine score distribution
+pts <- table(wine$points)
+barplot(pts, main = "Distribution of Wine Scores", xlab = "Scores", ylab = "Counts", col = "Dark Red")
+
+# Visualize wine price distribution
+prc <- table(wine$price)
+barplot(prc, main = "Distribution of Wine Prices", xlab = "Prices", ylab = "Counts", col = "Dark Red")
+
+# Visualize wine score vs. price
+plot(wine$points, wine$price, main = "Wine Points vs. Prices", xlab = "Points", ylab = "Prices")
+cor(wine$points, wine$price) # 0.4598634
+
 # Convert region1 and region2 to character variables
 wine$region_1 <- as.character(wine$region_1)
 wine$region_2 <- as.character(wine$region_2)
@@ -33,18 +49,6 @@ wine$region_1 <- as.factor(wine$region_1)
 wine$region_2 <- as.factor(wine$region_2)
 wine$variety <- factor(wine$variety)
 wine$winery <- factor(wine$winery)
-
-# Visualize wine score distribution
-pts <- table(wine$points)
-barplot(pts, main = "Distribution of Wine Scores", xlab = "Scores", ylab = "Counts", col = "Dark Red")
-
-# Visualize wine price distribution
-prc <- table(wine$price)
-barplot(prc, main = "Distribution of Wine Prices", xlab = "Prices", ylab = "Counts", col = "Dark Red")
-
-# Visualize wine score vs. price
-plot(wine$points, wine$price, main = "Wine Points vs. Prices", xlab = "Points", ylab = "Prices")
-cor(wine$points, wine$price)
 
 # Convert 100-based scores to 5-based ratings, and create a new column to store ratings 
 wine$ratings <- 0
