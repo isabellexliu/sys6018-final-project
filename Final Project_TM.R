@@ -131,20 +131,6 @@ lowprcwine.clean <- tm_map(lowprcwine.clean, removeWords, c("wine", "flavor"))  
 # Word Cloud
 wordcloud(lowprcwine.clean, max.words = 100, random.order = FALSE)
 
-
-# Alternative way to do word cloud
-dtm <- TermDocumentMatrix(wine.clean)
-m <- as.matrix(dtm) # but for some reason, I cannot run this line. R crushes every time...
-v <- sort(rowSums(m),decreasing=TRUE)
-d <- data.frame(word = names(v),freq=v)
-head(d, 10)
-set.seed(1234)
-wordcloud(words = d$word, freq = d$freq, min.freq = 1,
-          max.words=200, random.order=FALSE, rot.per=0.35, 
-          colors=brewer.pal(8, "Dark2"))
-
-
-# Not sure how to use this...
 # Compute TF-IDF matrix
 wine.clean.tfidf = DocumentTermMatrix(wine.clean, control = list(weighting = weightTfIdf))
 wine.clean.tfidf
