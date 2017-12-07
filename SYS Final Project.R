@@ -9,7 +9,6 @@ wine <- read.csv("wine.csv")
 
 ################################# Data Cleaning #################################
 
-
 # Remove missing values in points and price
 wine <- wine[complete.cases(wine),]
 
