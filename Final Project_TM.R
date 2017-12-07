@@ -48,6 +48,7 @@ wine.clean = tm_map(wine.clean, content_transformer(tolower))       # ignore cas
 wine.clean = tm_map(wine.clean, removeWords, stopwords("english"))  # remove stop words
 wine.clean = tm_map(wine.clean, stemDocument)                       # stem all words
 wine.clean <- tm_map(wine.clean, PlainTextDocument)                 # treat preprocessed documents as text documents
+wine.clean <- tm_map(wine.clean, removeWords, c("wine", "flavor"))  # remove wine and flavor as they appear in almost all documents
 
 # Word Cloud
 library(SnowballC)
@@ -68,6 +69,7 @@ topscrwine.clean = tm_map(topscrwine.clean, content_transformer(tolower))       
 topscrwine.clean = tm_map(topscrwine.clean, removeWords, stopwords("english"))  # remove stop words
 topscrwine.clean = tm_map(topscrwine.clean, stemDocument)                       # stem all words
 topscrwine.clean <- tm_map(topscrwine.clean, PlainTextDocument)                 # treat preprocessed documents as text documents
+topscrwine.clean <- tm_map(topscrwine.clean, removeWords, c("wine", "flavor"))  # remove wine and flavor as they appear in almost all documents
 
 # Word Cloud
 wordcloud(topscrwine.clean, max.words = 100, random.order = FALSE)
@@ -86,6 +88,7 @@ lowscrwine.clean = tm_map(lowscrwine.clean, content_transformer(tolower))       
 lowscrwine.clean = tm_map(lowscrwine.clean, removeWords, stopwords("english"))  # remove stop words
 lowscrwine.clean = tm_map(lowscrwine.clean, stemDocument)                       # stem all words
 lowscrwine.clean <- tm_map(lowscrwine.clean, PlainTextDocument)                 # treat preprocessed documents as text documents
+lowscrwine.clean <- tm_map(lowscrwine.clean, removeWords, c("wine", "flavor"))  # remove wine and flavor as they appear in almost all documents
 
 # Word Cloud
 wordcloud(lowscrwine.clean, max.words = 100, random.order = FALSE)
@@ -104,6 +107,7 @@ highprcwine.clean = tm_map(highprcwine.clean, content_transformer(tolower))     
 highprcwine.clean = tm_map(highprcwine.clean, removeWords, stopwords("english"))  # remove stop words
 highprcwine.clean = tm_map(highprcwine.clean, stemDocument)                       # stem all words
 highprcwine.clean <- tm_map(highprcwine.clean, PlainTextDocument)                 # treat preprocessed documents as text documents
+highprcwine.clean <- tm_map(highprcwine.clean, removeWords, c("wine", "flavor"))  # remove wine and flavor as they appear in almost all documents
 
 # Word Cloud
 wordcloud(highprcwine.clean, max.words = 100, random.order = FALSE)
@@ -122,6 +126,7 @@ lowprcwine.clean = tm_map(lowprcwine.clean, content_transformer(tolower))       
 lowprcwine.clean = tm_map(lowprcwine.clean, removeWords, stopwords("english"))  # remove stop words
 lowprcwine.clean = tm_map(lowprcwine.clean, stemDocument)                       # stem all words
 lowprcwine.clean <- tm_map(lowprcwine.clean, PlainTextDocument)                 # treat preprocessed documents as text documents
+lowprcwine.clean <- tm_map(lowprcwine.clean, removeWords, c("wine", "flavor"))  # remove wine and flavor as they appear in almost all documents
 
 # Word Cloud
 wordcloud(lowprcwine.clean, max.words = 100, random.order = FALSE)
