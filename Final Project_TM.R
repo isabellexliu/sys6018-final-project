@@ -53,7 +53,7 @@ wine.clean <- tm_map(wine.clean, removeWords, c("wine", "flavor"))  # remove win
 # Word Cloud
 library(SnowballC)
 library(wordcloud)
-wordcloud(wine.clean, max.words = 100, random.order = FALSE)
+wordcloud(wine.clean, max.words = 200, random.order = FALSE)
 
 ### The top-score wine dataset ###
 # Leave only the content
@@ -72,7 +72,7 @@ topscrwine.clean <- tm_map(topscrwine.clean, PlainTextDocument)                 
 topscrwine.clean <- tm_map(topscrwine.clean, removeWords, c("wine", "flavor"))  # remove wine and flavor as they appear in almost all documents
 
 # Word Cloud
-wordcloud(topscrwine.clean, max.words = 100, random.order = FALSE)
+wordcloud(topscrwine.clean, max.words = 200, random.order = FALSE)
 
 ### The low-score wine dataset ###
 # Leave only the content
@@ -91,7 +91,7 @@ lowscrwine.clean <- tm_map(lowscrwine.clean, PlainTextDocument)                 
 lowscrwine.clean <- tm_map(lowscrwine.clean, removeWords, c("wine", "flavor"))  # remove wine and flavor as they appear in almost all documents
 
 # Word Cloud
-wordcloud(lowscrwine.clean, max.words = 100, random.order = FALSE)
+wordcloud(lowscrwine.clean, max.words = 200, random.order = FALSE)
 
 ### The high-price wine dataset ###
 # Leave only the content
@@ -110,7 +110,7 @@ highprcwine.clean <- tm_map(highprcwine.clean, PlainTextDocument)               
 highprcwine.clean <- tm_map(highprcwine.clean, removeWords, c("wine", "flavor"))  # remove wine and flavor as they appear in almost all documents
 
 # Word Cloud
-wordcloud(highprcwine.clean, max.words = 100, random.order = FALSE)
+wordcloud(highprcwine.clean, max.words = 200, random.order = FALSE)
 
 ### The low-price wine dataset ###
 # Leave only the content
@@ -129,7 +129,7 @@ lowprcwine.clean <- tm_map(lowprcwine.clean, PlainTextDocument)                 
 lowprcwine.clean <- tm_map(lowprcwine.clean, removeWords, c("wine", "flavor"))  # remove wine and flavor as they appear in almost all documents
 
 # Word Cloud
-wordcloud(lowprcwine.clean, max.words = 100, random.order = FALSE)
+wordcloud(lowprcwine.clean, max.words = 200, random.order = FALSE)
 
 # Compute TF-IDF matrix
 wine.clean.tfidf = DocumentTermMatrix(wine.clean, control = list(weighting = weightTfIdf))
