@@ -174,3 +174,178 @@ rf_rate <- randomForest(ratings ~.-X-description-points, data = wine, mtry = 3, 
 rf_rate.cv <- rf.crossValidation(rf_rate, wine[, c(2,4,6,7,8,9,10,11)], p = 0.10, n = 99)
 rf_price <- randomForest(price ~.-X-description-ratings, data = wine, mtry = 3, importance = TRUE)
 rf_price.cv <- rf.crossValidation(rf_price, wine[, c(2,4,5,7,8,9,10,11)], p = 0.10, n = 99)
+ 
+       
+       
+################################### Linear ##################################
+
+###------------------###
+###Data Visualization###
+###------------------###
+library(ggplot2)
+ggplot(wine, aes(x=country, y= points)) +  geom_point(size=1, shape=1)
+# Canada don't have wine with points higher than 95 
+ggplot(wine, aes(x=designation, y= points)) +  geom_point(size=1, shape=1)
+# Some designation have higher point range 
+ggplot(wine, aes(x=price, y= points)) +  geom_point(size=1, shape=1)
+# there is not an obvious linear relationship, this is possibly because wine with low price can also get very decent grades
+ggplot(wine, aes(x=province, y= points)) +  geom_point(size=1, shape=1)
+# some provinces have wide point range but some do not 
+ggplot(wine, aes(x=region_1, y= points)) +  geom_point(size=1, shape=1)
+ggplot(wine, aes(x=region_2, y= points)) +  geom_point(size=1, shape=1)
+ggplot(wine, aes(x=variety, y= points)) +  geom_point(size=1, shape=1)
+ggplot(wine, aes(x=winery, y= points)) +  geom_point(size=1, shape=1)
+
+###----------------###
+#### Model building###
+###----------------###
+
+#### Basic Linear Model ####
+wine.lm <- lm(points~.-X-description-ratings, data = train)
+summary(wine.lm) # Multiple R-squared:  0.3629,	Adjusted R-squared:  0.3598 
+anova(wine.lm) # SSE residual sum of square 404230 
+
+## Find the residuals (and then use a plot to look for patterns/non-constant variance)
+ei<-resid(wine.lm)
+
+##The other residuals can be used to detect influential points and outliers. 
+## Find the studentized residuals
+ri<-rstandard(wine.lm)
+
+## Find the R-student residuals
+ti<-rstudent(wine.lm)
+
+## Normal probabilty plot
+qqnorm(rstudent(wine.lm))
+qqline(rstudent(wine.lm)) #Relatively normal distribution, although not perfect (tails)
+
+## Residual plot vs. fitted values
+yhat <- fitted(wine.lm)
+plot(yhat,ti) 
+
+## Residual plots vs. explanatory variables
+#Tough because most variables are categorical, so transformations are not really feasible
+plot(train$country, ti)
+plot(train$designation, ti)
+plot(train$price, ti)
+plot(train$province, ti)
+plot(train$region_1, ti)
+plot(train$region_2, ti)
+plot(train$variety, ti)
+plot(train$winery, ti)
+plot(train$ratings, ti)
+
+# The assumptions are violated seriously. 
+
+#### Leverage and Influence ####
+
+## A summary of potential leverage and/or influential points
+remove= rownames(summary(influence.measures(wine.lm)))
+# train <- train[-which(rownames(train) %in% remove),]
+
+#There are lots of influential points but they are real points that indicate the nature of our data
+#We should not remove them
+
+#### Check Multicollinearity ####
+# 
+library(DAAG)
+vif(wine.lm)  # country has very large VIF so we should be careful with this variable 
+
+# test correlation between points and price 
+cor.test(train$price, train$points)
+# t = 129.92, df = 57961, p-value < 2.2e-16
+# cor = 0.474919 
+
+
+#### Model Selection #### 
+
+## Iterative model selection
+## Begin by defining the models with no variables (null) and all variables (full)
+s.null <- lm(points~1, data=train[,-c(1,3,12)]) # build the model without "description", "X"(which is index column), 
+                                                # "ratings"(derived from points; used as another response variable)
+s.full <- lm(points~., data=train[,-c(1,3,12)])
+
+## Forward selection
+wine.forward = step(s.null, scope=list(lower=s.null, upper=s.full), direction="forward")
+wine.forward
+#lm(formula = points ~ price + region_1 + province + variety + 
+#   winery + region_2 + designation + country, data = train[,  -c(1,3,12)])
+                                                            
+
+## Backward selection
+wine.backward = step(s.full, scope=list(lower=s.null, upper=s.full), direction="backward")
+wine.backward
+# lm(formula = points ~ country + designation + price + province + 
+# region_1 + region_2 + variety + winery, data = train[, -c(1, 3, 12)])
+                                                         
+                                                    
+## Stepwise selection
+wine.stepwise = step(s.null, scope=list(lower=s.null, upper=s.full), direction="both")
+wine.stepwise
+#lm(formula = points ~ price + region_1 + province + variety + 
+#   winery + region_2 + designation + country, data = train[, -c(1, 3, 12)])
+                                                        
+
+# All three selections are the same. 
+# The result model is
+# lm(formula = points ~ price + region_1 + province + winery + 
+#    variety + region_2 + designation + country, data = train[,-c(1,3,12)])
+
+summary(wine.stepwise) # Multiple R-squared:  0.3629,	Adjusted R-squared:  0.3598 
+anova(wine.stepwise)  # 404230
+
+wine.result = wine.stepwise # The result the model is the same as our initial model with every possible variable in it. 
+# use the test data to see how well the model performs
+
+yhat.lm <- predict(wine.result, newdata = test[,-5])
+yhat.lm
+mean((yhat.lm - test$points)^2) # MSE: 6.89653
+
+## Cross Validation 
+library(boot)
+# for model  wine.result
+cv.err=cv.glm(train, wine.result)
+cv.err$delta # 
+
+#------------------------------------# 
+
+# All variables are in the model. We ended up with the same model as our initial model, which has every possible variables in it.
+# This contradicts with our expections because VIF summary table indicates that variable "country" has high multicollinearity 
+# concern. Therefore, we try removing the country from the model. 
+
+wine.remove = lm(formula = points ~.-country, data = train[-c(1,3,12)])
+
+
+### Model Evaluation ### 
+summary(wine.remove) #  Multiple R-squared:  0.3628 >0.3629,	Adjusted R-squared:  0.3597 > 0.3598 
+anova(wine.remove) # SSE = 404287 > 404230
+
+## check residuals 
+#  Residual plot vs. fitted values
+ti.remove <- rstudent(wine.remove)
+yhat.remove <- fitted(wine.remove)
+plot(yhat.remove,ti.remove)
+
+# Normal probabilty plot
+qqnorm(rstudent(wine.remove))
+qqline(rstudent(wine.remove)) #Relatively normal distribution, although not perfect (tails)
+
+
+# use test data to see how the model wine.remove performs
+yhat.lm <- predict(wine.remove, newdata = test[,-5])
+yhat.lm
+mean((yhat.lm - test$points)^2) # MSE: 6.898929
+
+## Cross Validation 
+library(boot)
+# for model  wine.result
+cv.err=cv.glm(train, wine.remove)
+cv.err$delta # 
+
+### Conclusion ### 
+# The summary table shows that MSE is a little higher, the R square lower compared to the full model. 
+# Therefore, we still go with our original model selected by forward, backward and stepwise selection. 
+# Though the variable has large VIF, it still contributes to the model so we decided to keep it. 
+
+wine.final.lm <- wine.result
+
