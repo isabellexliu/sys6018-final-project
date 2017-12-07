@@ -360,6 +360,7 @@ trctrl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
 set.seed(23)
 # run knn 
 
+# remove columns with low variance
 remove_cols <- nearZeroVar(train, names = TRUE, 
                               freqCut = 19, uniqueCut = 10)
 remove_cols
