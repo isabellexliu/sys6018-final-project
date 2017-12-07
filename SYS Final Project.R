@@ -38,9 +38,13 @@ wine$winery <- factor(wine$winery)
 pts <- table(wine$points)
 barplot(pts, main = "Distribution of Wine Scores", xlab = "Scores", ylab = "Counts", col = "Dark Red")
 
-# visualize wine price distribution
+# Visualize wine price distribution
 prc <- table(wine$price)
 barplot(prc, main = "Distribution of Wine Prices", xlab = "Prices", ylab = "Counts", col = "Dark Red")
+
+# Visualize wine score vs. price
+plot(wine$points, wine$price, main = "Wine Points vs. Prices", xlab = "Points", ylab = "Prices")
+cor(wine$points, wine$price)
 
 # Convert 100-based scores to 5-based ratings, and create a new column to store ratings 
 wine$ratings <- 0
