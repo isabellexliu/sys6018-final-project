@@ -71,7 +71,20 @@ samp <- sample(nrow(df.tfidf.97), nrow(df.tfidf.97) * 0.75)
 wine.tfidf.train <- df.tfidf.97[samp,]
 wine.tfidf.test <- df.tfidf.97[-samp,]
 
-#### Build KNN models of different k values to predict Price
+### Build KNN models of different k values to predict Ratings
+prediction.knn.3<-  knn(wine.tfidf.train, wine.tfidf.test,wine.tfidf.train$ratings, k=3)
+mean(prediction.knn.3 == wine.tfidf.test$ratings)
+# 1
+
+prediction.knn.5 <-  knn(wine.tfidf.train, wine.tfidf.test,wine.tfidf.train$ratings, k=5)
+mean(prediction.knn.5== wine.tfidf.test$ratings)
+# 1
+
+prediction.knn.10 <-  knn(wine.tfidf.train, wine.tfidf.test,wine.tfidf.train$ratings, k=10)
+mean(prediction.knn.10== wine.tfidf.test$ratings)
+# 1
+
+### Build KNN models of different k values to predict Price
 library(class)
 knn.5 <- knn(wine.tfidf.train, wine.tfidf.test, wine.tfidf.train$price, k = 5)
 knn.10 <- knn(wine.tfidf.train, wine.tfidf.test, wine.tfidf.train$price, k = 10)
@@ -99,20 +112,6 @@ conf.mat.10 <- table("Predictions" = knn.10, Actual = wine.tfidf.test$price)
 # Accuracy of the predictions
 (accuracy.5 <- sum(diag(conf.mat.5))/nrow(wine.tfidf.test) * 100) # 38.75659
 (accuracy.10 <- sum(diag(conf.mat.10))/nrow(wine.tfidf.test) * 100) # 40.65114
-
-
-#### Build KNN models of different k values to predict Ratings
-prediction.knn.3<-  knn(wine.tfidf.train, wine.tfidf.test,wine.tfidf.train$ratings, k=3)
-mean(prediction.knn.3 == wine.tfidf.test$ratings)
-# 1
-
-prediction.knn.5 <-  knn(wine.tfidf.train, wine.tfidf.test,wine.tfidf.train$ratings, k=5)
-mean(prediction.knn.5== wine.tfidf.test$ratings)
-#  1
-
-prediction.knn.10 <-  knn(wine.tfidf.train, wine.tfidf.test,wine.tfidf.train$ratings, k=10)
-mean(prediction.knn.10== wine.tfidf.test$ratings)
-#   1
 
 # Conclusion:
 # The K Nearest Neighborhood predicition produced a high accuracy rate, which is approximately 100%.
