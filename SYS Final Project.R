@@ -468,7 +468,6 @@ mean((yhat.price.lm - test$price)^2) # MSE: 2613.659
 
 
 ################################ Non-parametric method (knn) ################################
-
 library(caret)
 
 # create a training control
@@ -481,29 +480,57 @@ set.seed(23)
 remove_cols <- nearZeroVar(train, names = TRUE, 
                               freqCut = 19, uniqueCut = 10)
 remove_cols
-knn.fit <- train(points ~.-X-description-ratings, data = train, method = "knn",
+
+ratings.knn <- train(ratings ~.-X-description-points, data = train, method = "knn",
                  trControl=trctrl,
                  preProcess = c("center", "scale"),
                  tuneLength = 5)
 
-knn.fit
+ratings.knn
 
-#k-Nearest Neighbors 
+# k-Nearest Neighbors 
 
-#57963 samples
-#10 predictor
+# 57963 samples
+# 10 predictor
 
-#Pre-processing: centered (259), scaled (259) 
-#Resampling: Cross-Validated (5 fold, repeated 1 times) 
-#Summary of sample sizes: 46370, 46371, 46370, 46370, 46371 
-#Resampling results across tuning parameters:
+# Pre-processing: centered (259), scaled (259) 
+# Resampling: Cross-Validated (5 fold, repeated 1 times) 
+# Summary of sample sizes: 46371, 46370, 46370, 46370, 46371 
+# Resampling results across tuning parameters:
+  
+#   k   RMSE      Rsquared   MAE     
+#   5  2.112333  0.4354025  1.653223
+#   7  2.112407  0.4319889  1.668210
+#   9  2.116136  0.4283033  1.678216
+#   11  2.122360  0.4240256  1.688262
+#   13  2.127735  0.4205104  1.696378
+
+# RMSE was used to select the optimal model using  the smallest value.
+# The final value used for the model was k = 5.
+
+
+price.knn <- train(price ~.-X-description-ratings, data = train, method = "knn",
+                 trControl=trctrl,
+                 preProcess = c("center", "scale"),
+                 tuneLength = 5)
+price.knn
+
+# k-Nearest Neighbors 
+
+# 57963 samples
+# 10 predictor
+
+# Pre-processing: centered (259), scaled (259) 
+# Resampling: Cross-Validated (5 fold, repeated 1 times) 
+# Summary of sample sizes: 46371, 46371, 46369, 46371, 46370 
+# Resampling results across tuning parameters:
   
 #  k   RMSE      Rsquared   MAE     
-#  5  2.480585  0.4405764  1.929249
-#  7  2.484981  0.4356123  1.939000
-#  9  2.488855  0.4321065  1.948077
-#  11  2.496001  0.4277634  1.957117
-#  13  2.503311  0.4238275  1.966980
+#  5  25.75544  0.5015841  12.24421
+#  7  26.18041  0.4853749  12.42380
+#  9  26.34410  0.4789115  12.51470
+#  11  26.59876  0.4690576  12.58488
+#  13  26.81435  0.4608249  12.68462
 
 # RMSE was used to select the optimal model using  the smallest value.
 # The final value used for the model was k = 5.
