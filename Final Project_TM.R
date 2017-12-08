@@ -32,7 +32,9 @@ lowscrwine <- wine[wine$ratings %in% 1,]
 highprcwine <- wine[wine$price > 150,]
 lowprcwine <- wine[wine$price <= 8,]
 
-# Text Mining
+
+################################## Text Mining ##################################
+
 library(tm)
 ### The entire wine dataset ###
 # Leave only the content
@@ -50,7 +52,57 @@ wine.clean = tm_map(wine.clean, stemDocument)                       # stem all w
 wine.clean <- tm_map(wine.clean, PlainTextDocument)                 # treat preprocessed documents as text documents
 wine.clean <- tm_map(wine.clean, removeWords, c("wine", "flavor"))  # remove wine and flavor as they appear in almost all documents
 
-# Word Cloud
+# Compute TF-IDF matrix
+wine.clean.tfidf = DocumentTermMatrix(wine.clean, control = list(weighting = weightTfIdf))
+wine.clean.tfidf
+
+# We've still got a very sparse document-term matrix. remove sparse terms at various thresholds.
+# Remove terms that are absent from at least 97% of documents (keep most terms)
+tfidf.97 = removeSparseTerms(wine.clean.tfidf, 0.97)
+tfidf.97
+
+# Convert the document-term matrix to a dataframe
+df.tfidf.97 = as.data.frame(as.matrix(tfidf.97))
+df.tfidf.97 = cbind(wine$price, df.tfidf.97)
+colnames(df.tfidf.97)[1] <- "price"
+
+# Sample the data into training and testing sets
+samp <- sample(nrow(df.tfidf.97), nrow(df.tfidf.97) * 0.75)
+wine.tfidf.train <- df.tfidf.97[samp,]
+wine.tfidf.test <- df.tfidf.97[-samp,]
+
+# Build KNN models of different k values to predict price
+library(class)
+knn.5 <- knn(wine.tfidf.train, wine.tfidf.test, wine.tfidf.train$price, k = 5)
+knn.10 <- knn(wine.tfidf.train, wine.tfidf.test, wine.tfidf.train$price, k = 10)
+
+# Make predictions using the two models
+conf.mat.5 <- table("Predictions" = knn.5, Actual = wine.tfidf.test$price)
+conf.mat.10 <- table("Predictions" = knn.10, Actual = wine.tfidf.test$price)
+
+# Accuracy of the predictions
+(accuracy.5 <- sum(diag(conf.mat.5))/nrow(wine.tfidf.test) * 100) # 98.24244
+(accuracy.10 <- sum(diag(conf.mat.10))/nrow(wine.tfidf.test) * 100) # 98.24536
+
+# log transform price
+wine.tfidf.train$price <- log(wine.tfidf.train$price)
+wine.tfidf.test$price <- log(wine.tfidf.test$price)
+
+# Build KNN models of different k values to predict price
+knn.5 <- knn(wine.tfidf.train, wine.tfidf.test, wine.tfidf.train$price, k = 5)
+knn.10 <- knn(wine.tfidf.train, wine.tfidf.test, wine.tfidf.train$price, k = 10)
+
+# Make predictions using the two models
+conf.mat.5 <- table("Predictions" = knn.5, Actual = wine.tfidf.test$price)
+conf.mat.10 <- table("Predictions" = knn.10, Actual = wine.tfidf.test$price)
+
+# Accuracy of the predictions
+(accuracy.5 <- sum(diag(conf.mat.5))/nrow(wine.tfidf.test) * 100) # 38.75659
+(accuracy.10 <- sum(diag(conf.mat.10))/nrow(wine.tfidf.test) * 100) # 40.65114
+
+
+################################## Word Cloud ###################################
+
 library(SnowballC)
 library(wordcloud)
 wordcloud(wine.clean, max.words = 200, random.order = FALSE)
@@ -130,20 +182,3 @@ lowprcwine.clean <- tm_map(lowprcwine.clean, removeWords, c("wine", "flavor"))  
 
 # Word Cloud
 wordcloud(lowprcwine.clean, max.words = 200, random.order = FALSE)
-
-# Compute TF-IDF matrix
-wine.clean.tfidf = DocumentTermMatrix(wine.clean, control = list(weighting = weightTfIdf))
-wine.clean.tfidf
-
-# We've still got a very sparse document-term matrix. remove sparse terms at various thresholds.
-# Remove terms that are absent from at least 97% of documents (keep most terms)
-tfidf.97 = removeSparseTerms(wine.clean.tfidf, 0.97)
-tfidf.97
-
-# Convert the document-term matrix to a dataframe
-df.tfidf.97 = as.data.frame(as.matrix(tfidf.97))
-df.tfidf.97 = cbind(wine$ratings, df.tfidf.97)
-colnames(df.tfidf.97)[1] <- "ratings"
-# Create a dataframe of distances between variables
-df.dist.matrix = as.matrix(dist(df.tfidf.97))
-
