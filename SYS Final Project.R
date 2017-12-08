@@ -221,9 +221,9 @@ ggplot(wine, aes(x=region_2, y= points)) +  geom_point(size=1, shape=1)
 ggplot(wine, aes(x=variety, y= points)) +  geom_point(size=1, shape=1)
 ggplot(wine, aes(x=winery, y= points)) +  geom_point(size=1, shape=1)
 
-###--------------------------------###
-####  Model building for points    ###
-###--------------------------------###
+###-------------------------------###
+###  Model building for points    ###
+###-------------------------------###
 
 #### Basic Linear Model ####
 wine.lm <- lm(points~.-X-description-ratings, data = train)
@@ -240,7 +240,7 @@ yhat <- fitted(wine.lm)
 plot(yhat,ti) 
 
 ## Residual plots vs. explanatory variables
-#Tough because most variables are categorical, so transformations are not really feasible
+# Tough because most variables are categorical, so transformations are not really feasible
 plot(train$country, ti)
 plot(train$designation, ti)
 plot(train$price, ti)
@@ -259,11 +259,11 @@ plot(train$ratings, ti)
 remove= rownames(summary(influence.measures(wine.lm)))
 # train <- train[-which(rownames(train) %in% remove),]
 
-#There are lots of influential points but they are real points that indicate the nature of our data
-#We should not remove them
+# There are lots of influential points but they are real points that indicate the nature of our data
+# We should not remove them
 
 #### Check Multicollinearity ####
-# 
+
 library(DAAG)
 vif(wine.lm)  # country has very large VIF so we should be careful with this variable 
 
@@ -281,7 +281,7 @@ summary(wine.points.trans) # Multiple R-squared:  0.3664,	Adjusted R-squared:  0
 anova(wine.points.trans) # SSE residual sum of square 1.2550e+10  (SSE exploded and R square does not improve
 # much so we decided not to transform it)
 
-
+       
 #### Model Selection #### 
 
 ## Iterative model selection
@@ -293,22 +293,20 @@ s.full <- lm(points~., data=train[,-c(1,3,12)])
 ## Forward selection
 wine.forward = step(s.null, scope=list(lower=s.null, upper=s.full), direction="forward")
 wine.forward
-#lm(formula = points ~ price + region_1 + province + variety + 
-#   winery + region_2 + designation + country, data = train[,  -c(1,3,12)])
+# lm(formula = points ~ price + region_1 + province + variety + 
+#    winery + region_2 + designation + country, data = train[,  -c(1,3,12)])
                                                             
-
 ## Backward selection
 wine.backward = step(s.full, scope=list(lower=s.null, upper=s.full), direction="backward")
 wine.backward
 # lm(formula = points ~ country + designation + price + province + 
 # region_1 + region_2 + variety + winery, data = train[, -c(1, 3, 12)])
-                                                         
-                                                    
+                                                                                                     
 ## Stepwise selection
 wine.stepwise = step(s.null, scope=list(lower=s.null, upper=s.full), direction="both")
 wine.stepwise
-#lm(formula = points ~ price + region_1 + province + variety + 
-#   winery + region_2 + designation + country, data = train[, -c(1, 3, 12)])
+# lm(formula = points ~ price + region_1 + province + variety + 
+#    winery + region_2 + designation + country, data = train[, -c(1, 3, 12)])
                                                         
 
 # All three selections are the same. 
@@ -355,7 +353,6 @@ plot(yhat.remove,ti.remove)
 qqnorm(rstudent(wine.remove))
 qqline(rstudent(wine.remove)) #Relatively normal distribution, although not perfect (tails)
 
-
 # use test data to see how the model wine.remove performs
 yhat.lm <- predict(wine.remove, newdata = test[,-5])
 yhat.lm
@@ -363,7 +360,7 @@ mean((yhat.lm - test$points)^2) # MSE: 6.898929
 
 ## Cross Validation 
 library(boot)
-# for model  wine.result
+# for model wine.result
 cv.err=cv.glm(train, wine.remove)
 cv.err$delta 
 
@@ -373,14 +370,14 @@ cv.err$delta
 # Though the variable has large VIF, it still contributes to the model so we decided to keep it. 
 
 wine.final.lm <- wine.result
- # The final model is 
+# The final model is 
 # lm(formula = points ~ price + region_1 + province + winery + 
 #    variety + region_2 + designation + country, data = train[,-c(1,3,12)])
+       
        
 ###--------------------------------###
 ####  Model building for price    ###
 ###--------------------------------###
-
 
 #### Basic Linear Model ####
 wine.price <- lm(price~.-X-description-ratings, data = train)
@@ -388,14 +385,14 @@ summary(wine.price) # Multiple R-squared:  0.3483,	Adjusted R-squared:  0.3451
 anova(wine.price) # SSE residual sum of square 50122994 
 
 ## Find the residuals (and then use a plot to look for patterns/non-constant variance)
-ei<-resid(wine.price)
+ei <-resid(wine.price)
 
-##The other residuals can be used to detect influential points and outliers. 
+## The other residuals can be used to detect influential points and outliers. 
 ## Find the studentized residuals
-ri<-rstandard(wine.price)
+ri <-rstandard(wine.price)
 
 ## Find the R-student residuals
-ti<-rstudent(wine.price)
+ti <-rstudent(wine.price)
 
 ## Normal probabilty plot
 qqnorm(rstudent(wine.price))
@@ -407,7 +404,7 @@ plot(yhat,ti)
 
 # Transformation 
 library(MASS)
-boxcox(wine.price)  #lamda close to 0 so we try transform price using log()
+boxcox(wine.price)  # lamda close to 0 so we try transform price using log()
 wine.price.trans <- lm(log(price)~.-X-description-ratings, data = train)
 summary(wine.price.trans) # Multiple R-squared:  0.5826,	Adjusted R-squared:  0.5805 
 anova(wine.price.trans) # SSE residual sum of square 10477.6 
@@ -424,23 +421,20 @@ s.full <- lm(log(price)~., data=train[,-c(1,3,12)])
 ## Forward selection
 wine.forward = step(s.null, scope=list(lower=s.null, upper=s.full), direction="forward")
 wine.forward
-#lm(formula = log(price) ~ points + region_2 + variety + province + 
-# winery + designation + region_1 + country, data = train[,  -c(1, 3, 12)])
+# lm(formula = log(price) ~ points + region_2 + variety + province + 
+#    winery + designation + region_1 + country, data = train[,  -c(1, 3, 12)])
                                                        
-
 ## Backward selection
 wine.backward = step(s.full, scope=list(lower=s.null, upper=s.full), direction="backward")
 wine.backward
 # lm(formula = log(price) ~ country + designation + points + province + 
-# region_1 + region_2 + variety + winery, data = train[, -c(1, 3, 12)])
+#    region_1 + region_2 + variety + winery, data = train[, -c(1, 3, 12)])
                                                          
-
 ## Stepwise selection
 wine.stepwise = step(s.null, scope=list(lower=s.null, upper=s.full), direction="both")
 wine.stepwise
-#lm(formula = log(price) ~ price + region_1 + province + variety + 
-#   winery + region_2 + designation + country, data = train[, -c(1, 3, 12)])
-
+# lm(formula = log(price) ~ price + region_1 + province + variety + 
+#    winery + region_2 + designation + country, data = train[, -c(1, 3, 12)])
 
 wine.price.final <- wine.stepwise
 ## Check assumption for the model 
@@ -471,8 +465,8 @@ mean((yhat.price.lm - test$price)^2) # MSE: 876
 #    winery + region_2 + designation + country, data = train[, -c(1, 3, 12)])
 
 
-
 ################################ Non-parametric method (knn) ################################
+
 library(caret)
 
 # create a training control
@@ -503,10 +497,10 @@ ratings.knn
 # Summary of sample sizes: 46371, 46370, 46370, 46370, 46371 
 # Resampling results across tuning parameters:
   
-#   k   RMSE      Rsquared   MAE     
-#   5  2.112333  0.4354025  1.653223
-#   7  2.112407  0.4319889  1.668210
-#   9  2.116136  0.4283033  1.678216
+#   k       RMSE   Rsquared       MAE     
+#   5   2.112333  0.4354025  1.653223
+#   7   2.112407  0.4319889  1.668210
+#   9   2.116136  0.4283033  1.678216
 #   11  2.122360  0.4240256  1.688262
 #   13  2.127735  0.4205104  1.696378
 
@@ -530,10 +524,10 @@ price.knn
 # Summary of sample sizes: 46371, 46371, 46369, 46371, 46370 
 # Resampling results across tuning parameters:
   
-#  k   RMSE      Rsquared   MAE     
-#  5  25.75544  0.5015841  12.24421
-#  7  26.18041  0.4853749  12.42380
-#  9  26.34410  0.4789115  12.51470
+#  k       RMSE   Rsquared       MAE     
+#  5   25.75544  0.5015841  12.24421
+#  7   26.18041  0.4853749  12.42380
+#  9   26.34410  0.4789115  12.51470
 #  11  26.59876  0.4690576  12.58488
 #  13  26.81435  0.4608249  12.68462
 
