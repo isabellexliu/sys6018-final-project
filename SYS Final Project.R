@@ -217,24 +217,14 @@ ggplot(wine, aes(x=region_2, y= points)) +  geom_point(size=1, shape=1)
 ggplot(wine, aes(x=variety, y= points)) +  geom_point(size=1, shape=1)
 ggplot(wine, aes(x=winery, y= points)) +  geom_point(size=1, shape=1)
 
-###----------------###
-### Model building ###
-###----------------###
+###--------------------------------###
+####  Model building for points    ###
+###--------------------------------###
 
 #### Basic Linear Model ####
 wine.lm <- lm(points~.-X-description-ratings, data = train)
 summary(wine.lm) # Multiple R-squared:  0.3629,	Adjusted R-squared:  0.3598 
 anova(wine.lm) # SSE residual sum of square 404230 
-
-## Find the residuals (and then use a plot to look for patterns/non-constant variance)
-ei<-resid(wine.lm)
-
-##The other residuals can be used to detect influential points and outliers. 
-## Find the studentized residuals
-ri<-rstandard(wine.lm)
-
-## Find the R-student residuals
-ti<-rstudent(wine.lm)
 
 ## Normal probabilty plot
 qqnorm(rstudent(wine.lm))
@@ -276,6 +266,15 @@ vif(wine.lm)  # country has very large VIF so we should be careful with this var
 cor.test(train$price, train$points)
 # t = 129.92, df = 57961, p-value < 2.2e-16
 # cor = 0.474919 
+
+# Transformation 
+boxcox(wine.lm)  # lamda close to 2
+# try fit the model with the transformed response variable 
+
+wine.points.trans <- lm((points)^2~.-X-description-ratings, data = train)
+summary(wine.points.trans) # Multiple R-squared:  0.3664,	Adjusted R-squared:  0.3633 
+anova(wine.points.trans) # SSE residual sum of square 1.2550e+10  (SSE exploded and R square does not improve
+# much so we decided not to transform it)
 
 
 #### Model Selection #### 
@@ -326,7 +325,7 @@ mean((yhat.lm - test$points)^2) # MSE: 6.89653
 library(boot)
 # for model  wine.result
 cv.err=cv.glm(train, wine.result)
-cv.err$delta # 
+cv.err$delta 
 
 #------------------------------------# 
 
@@ -361,7 +360,7 @@ mean((yhat.lm - test$points)^2) # MSE: 6.898929
 library(boot)
 # for model  wine.result
 cv.err=cv.glm(train, wine.remove)
-cv.err$delta # 
+cv.err$delta 
 
 ### Conclusion ### 
 # The summary table shows that MSE is a little higher, the R square lower compared to the full model. 
@@ -369,6 +368,103 @@ cv.err$delta #
 # Though the variable has large VIF, it still contributes to the model so we decided to keep it. 
 
 wine.final.lm <- wine.result
+ # The final model is 
+# lm(formula = points ~ price + region_1 + province + winery + 
+#    variety + region_2 + designation + country, data = train[,-c(1,3,12)])
+       
+###--------------------------------###
+####  Model building for price    ###
+###--------------------------------###
+
+
+#### Basic Linear Model ####
+wine.price <- lm(price~.-X-description-ratings, data = train)
+summary(wine.price) # Multiple R-squared:  0.3483,	Adjusted R-squared:  0.3451  
+anova(wine.price) # SSE residual sum of square 50122994 
+
+## Find the residuals (and then use a plot to look for patterns/non-constant variance)
+ei<-resid(wine.price)
+
+##The other residuals can be used to detect influential points and outliers. 
+## Find the studentized residuals
+ri<-rstandard(wine.price)
+
+## Find the R-student residuals
+ti<-rstudent(wine.price)
+
+## Normal probabilty plot
+qqnorm(rstudent(wine.price))
+qqline(rstudent(wine.price)) # not normal in tails
+
+## Residual plot vs. fitted values
+yhat <- fitted(wine.price)
+plot(yhat,ti) 
+
+# Transformation 
+library(MASS)
+boxcox(wine.price)  #lamda close to 0 so we try transform price using log()
+wine.price.trans <- lm(log(price)~.-X-description-ratings, data = train)
+summary(wine.price.trans) # Multiple R-squared:  0.5826,	Adjusted R-squared:  0.5805 
+anova(wine.price.trans) # SSE residual sum of square 10477.6 
+# We reduced the SSE a lot and improved on R-squared score so we decided to use the transformation 
+
+#### Model Selection #### 
+
+## Iterative model selection
+## Begin by defining the models with no variables (null) and all variables (full)
+s.null <- lm(log(price)~1, data=train[,-c(1,3,12)]) # build the model without "description", "X"(which is index column), 
+# "ratings"(derived from points; used as another response variable)
+s.full <- lm(log(price)~., data=train[,-c(1,3,12)])
+
+## Forward selection
+wine.forward = step(s.null, scope=list(lower=s.null, upper=s.full), direction="forward")
+wine.forward
+#lm(formula = log(price) ~ points + region_2 + variety + province + 
+# winery + designation + region_1 + country, data = train[,  -c(1, 3, 12)])
+                                                       
+
+## Backward selection
+wine.backward = step(s.full, scope=list(lower=s.null, upper=s.full), direction="backward")
+wine.backward
+# lm(formula = log(price) ~ country + designation + points + province + 
+# region_1 + region_2 + variety + winery, data = train[, -c(1, 3, 12)])
+                                                         
+
+## Stepwise selection
+wine.stepwise = step(s.null, scope=list(lower=s.null, upper=s.full), direction="both")
+wine.stepwise
+#lm(formula = log(price) ~ price + region_1 + province + variety + 
+#   winery + region_2 + designation + country, data = train[, -c(1, 3, 12)])
+
+
+wine.price.final <- wine.stepwise
+## Check assumption for the model 
+
+## Normal probabilty plot
+qqnorm(rstudent(wine.price.final))
+qqline(rstudent(wine.price.final)) #Better than the one before transformation 
+# Relatively normal distribution, although not perfect (tails)
+
+## Residual plot vs. fitted values
+yhat.price <- fitted(wine.price.final)
+plot(yhat.price,ti) 
+
+# use test data to see how the model wine.price.final performs
+yhat.price.lm <- predict(wine.price.final, newdata = test[,-6])
+yhat.price.lm
+mean((yhat.price.lm - test$price)^2) # MSE: 2613.659
+
+
+# Conclusion：
+# After transformation, we successfully increased the R square from 34.83% to 58.26%. And the Normal Probability
+# plot shows that residuals are approximately normal though there is a little deviance in the tail. However,the variance of the 
+# residuals increase with price. Our explanation for this is that the reviews for those high priced wine vary more than 
+# those cheap wine. 
+
+# The final model is 
+# lm(formula = log(price) ~ price + region_1 + province + variety + 
+#    winery + region_2 + designation + country, data = train[, -c(1, 3, 12)])
+
 
 
 ################################ Non-parametric method (knn) ################################
