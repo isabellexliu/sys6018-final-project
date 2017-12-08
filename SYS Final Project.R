@@ -24,6 +24,10 @@ barplot(prc, main = "Distribution of Wine Prices", xlab = "Prices", ylab = "Coun
 plot(wine$points, wine$price, main = "Wine Points vs. Prices", xlab = "Points", ylab = "Prices")
 cor(wine$points, wine$price) # 0.4598634
 
+# Visualize wine score vs. log(price)
+plot(wine$points, log(wine$price), main = "Wine Points vs. log(Prices)", xlab = "Points", ylab = "log(Prices)")
+cor(wine$points, log(wine$price)) # 0.6111787
+
 # Convert region1 and region2 to character variables
 wine$region_1 <- as.character(wine$region_1)
 wine$region_2 <- as.character(wine$region_2)
