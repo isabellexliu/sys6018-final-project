@@ -168,20 +168,41 @@ yhat.rf <- predict(rf_price, newdata = test)[,2]
 yhat.rf
 mean((yhat.rf - test$price)^2) # MSE: 489.0404
 
+# log transform price
+train$price <- log(train$price)
+rf_logprice <- randomForest(price ~.-X-description-ratings, data = train, mtry = 3, importance = TRUE)
+importance(rf_logprice)
+#               %IncMSE IncNodePurity
+# country      51.14199      287.5647
+# designation 187.56396      590.4254
+# points      553.43506     7863.8720
+# province    103.42743     1769.3079
+# region_1     73.50896     1838.8196
+# region_2    114.33395     2915.2446
+# variety     329.86556     3432.3910
+# winery      135.54975      458.2711
+varImpPlot(rf_logprice)
+test$price <- log(test$price)
+yhat.rf <- predict(rf_logprice, newdata = test)
+yhat.rf
+mean((yhat.rf - test$price)^2) # MSE: 0.1355413       
+
 # Cross Validation
 library(rfUtilities)
 rf_rate <- randomForest(ratings ~.-X-description-points, data = wine, mtry = 3, importance = TRUE)
 rf_rate.cv <- rf.crossValidation(rf_rate, wine[, c(2,4,6,7,8,9,10,11)], p = 0.10, n = 99)
 rf_price <- randomForest(price ~.-X-description-ratings, data = wine, mtry = 3, importance = TRUE)
 rf_price.cv <- rf.crossValidation(rf_price, wine[, c(2,4,5,7,8,9,10,11)], p = 0.10, n = 99)
- 
+wine$price <- log(wine$price)
+rf_logprice <- randomForest(price ~.-X-description-ratings, data = wine, mtry = 3, importance = TRUE)
+rf_logprice.cv <- rf.crossValidation(rf_logprice, wine[, c(2,4,5,7,8,9,10,11)], p = 0.10, n = 99)
        
        
 ################################### Linear ##################################
 
-###------------------###
-###Data Visualization###
-###------------------###
+###--------------------###
+### Data Visualization ###
+###--------------------###
 library(ggplot2)
 ggplot(wine, aes(x=country, y= points)) +  geom_point(size=1, shape=1)
 # Canada don't have wine with points higher than 95 
@@ -197,7 +218,7 @@ ggplot(wine, aes(x=variety, y= points)) +  geom_point(size=1, shape=1)
 ggplot(wine, aes(x=winery, y= points)) +  geom_point(size=1, shape=1)
 
 ###----------------###
-#### Model building###
+### Model building ###
 ###----------------###
 
 #### Basic Linear Model ####
@@ -350,7 +371,7 @@ cv.err$delta #
 wine.final.lm <- wine.result
 
 
-########## Non-parametric method (knn) ##########
+################################ Non-parametric method (knn) ################################
 
 library(caret)
 
