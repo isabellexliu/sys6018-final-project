@@ -110,8 +110,8 @@ prediction.knn.5 <-  knn(wine.tfidf.train, wine.tfidf.test,wine.tfidf.train$rati
 mean(prediction.knn.5== wine.tfidf.test$ratings)
 #  1
 
-prediction.knn.7 <-  knn(wine.tfidf.train, wine.tfidf.test,wine.tfidf.train$ratings, k=7)
-mean(prediction.knn.7 == wine.tfidf.test$ratings)
+prediction.knn.10 <-  knn(wine.tfidf.train, wine.tfidf.test,wine.tfidf.train$ratings, k=10)
+mean(prediction.knn.10== wine.tfidf.test$ratings)
 #   1
 
 # Conclusion:
