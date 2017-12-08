@@ -229,6 +229,7 @@ ggplot(wine, aes(x=winery, y= points)) +  geom_point(size=1, shape=1)
 wine.lm <- lm(points~.-X-description-ratings, data = train)
 summary(wine.lm) # Multiple R-squared:  0.3629,	Adjusted R-squared:  0.3598 
 anova(wine.lm) # SSE residual sum of square 404230 
+               # MSE = 7 
 
 ## Normal probabilty plot
 qqnorm(rstudent(wine.lm))
@@ -456,7 +457,7 @@ plot(yhat.price,ti)
 # use test data to see how the model wine.price.final performs
 yhat.price.lm <- predict(wine.price.final, newdata = test[,-6])
 yhat.price.lm
-mean((yhat.price.lm - test$price)^2) # MSE: 2613.659
+mean((yhat.price.lm - test$price)^2) # MSE: 876
 
 
 # Conclusion：
